@@ -1,1 +1,221 @@
-{}
+{
+  "slots": [
+    {
+      "id": 1,
+      "label": "Group 1",
+      "entries": []
+    },
+    {
+      "id": 2,
+      "label": "Group 2",
+      "entries": []
+    },
+    {
+      "id": 3,
+      "label": "Group 3",
+      "entries": []
+    },
+    {
+      "id": 4,
+      "label": "Group 4",
+      "entries": []
+    },
+    {
+      "id": 5,
+      "label": "Group 5",
+      "entries": []
+    },
+    {
+      "id": 6,
+      "label": "Group 6",
+      "entries": []
+    },
+    {
+      "id": 7,
+      "label": "Group 7",
+      "entries": []
+    },
+    {
+      "id": 8,
+      "label": "Group 8",
+      "entries": []
+    },
+    {
+      "id": 9,
+      "label": "Group 9",
+      "entries": []
+    },
+    {
+      "id": 10,
+      "label": "Group 10",
+      "entries": []
+    },
+    {
+      "id": 11,
+      "label": "Group 11",
+      "entries": []
+    },
+    {
+      "id": 12,
+      "label": "Group 12",
+      "entries": []
+    },
+    {
+      "id": 13,
+      "label": "Group 13",
+      "entries": []
+    },
+    {
+      "id": 14,
+      "label": "Group 14",
+      "entries": []
+    },
+    {
+      "id": 15,
+      "label": "Group 15",
+      "entries": []
+    },
+    {
+      "id": 16,
+      "label": "Group 16",
+      "entries": []
+    },
+    {
+      "id": 17,
+      "label": "Group 17",
+      "entries": []
+    },
+    {
+      "id": 18,
+      "label": "Group 18",
+      "entries": []
+    },
+    {
+      "id": 19,
+      "label": "Group 19",
+      "entries": []
+    },
+    {
+      "id": 20,
+      "label": "Group 20",
+      "entries": []
+    },
+    {
+      "id": 21,
+      "label": "Group 21",
+      "entries": []
+    },
+    {
+      "id": 22,
+      "label": "Group 22",
+      "entries": []
+    },
+    {
+      "id": 23,
+      "label": "Group 23",
+      "entries": []
+    },
+    {
+      "id": 24,
+      "label": "Group 24",
+      "entries": []
+    },
+    {
+      "id": 25,
+      "label": "Group 25",
+      "entries": []
+    }
+  ],
+  "namePool": [
+    "Anita Murphy",
+    "Ann Peterson",
+    "Barb Levins",
+    "Betty Ann Rostrup",
+    "Betty Belanger",
+    "Bev Lefevre",
+    "Bev Swanson",
+    "Cheryl Flaman",
+    "Cheryl Kothlow",
+    "Christine Erickson",
+    "Christine Wheaton",
+    "Cindy Davis",
+    "Crystal Neumann",
+    "Darlane Knox",
+    "Debbie Carter",
+    "Debbie Kalynuk",
+    "Debbie Wolfe",
+    "Doris Stoikopoulos",
+    "Edie Pituskin",
+    "Eileen Ewan",
+    "Elaine Stevenson",
+    "Elsie Morin",
+    "Elvira Bautista-Marshall",
+    "Emily Kalwarowsky",
+    "Fay Buchanan",
+    "Fern Fohry",
+    "Gail Benner",
+    "Gail Hordal",
+    "Gwen Petryk",
+    "Heather Van Horn",
+    "Helen Hinteregger",
+    "Ida Webster",
+    "Irene Dubois",
+    "Jacqueline Gingell-Sarich",
+    "Joan Coyle",
+    "Joey Younie",
+    "Jonnie Goodin",
+    "Joy Van Marck",
+    "Karen Krochak",
+    "Kari Maynes",
+    "Kathleen Hunter",
+    "Kim Fraser",
+    "Laura Spencer",
+    "Laurette Romanko",
+    "Laurie Dyki",
+    "Laurie Laviolette",
+    "Lesley Karpiak",
+    "Linda Buerger",
+    "Linda McCollum",
+    "Linda Wilkinson",
+    "Lisette Turcotte",
+    "Louise Ripley",
+    "Lynda Lambertson",
+    "Lynn Bidney",
+    "Lynne De Zaeyer",
+    "Maggie Mines",
+    "Margo Baptista",
+    "Marian Hordal",
+    "Marie Keller",
+    "Marielle Bazinet",
+    "Marion Francis",
+    "Marylynn Comeault",
+    "Maureen Muldoon",
+    "Michelle Poulin",
+    "Mickey Turner",
+    "Myrna Ross",
+    "Natalka Strilesky",
+    "Pat Ireland",
+    "Patty Worthington",
+    "Rae Elson",
+    "Renee Elio",
+    "Roberta Babcock",
+    "Sherry Dahlke",
+    "Sherry Kinjerski",
+    "Sherry Noyes",
+    "Sherry Rundle",
+    "Shirley Lockhart",
+    "Sue Biegel",
+    "Tanya Weir",
+    "Terri Kilmartin",
+    "Tracy Fata",
+    "Ursula Kernaghan",
+    "Victoria Powluk",
+    "Violette Sanderson",
+    "Wendy Bye",
+    "Wendy Fuller",
+    "Wendy MacDougall",
+    "Wendy Scherger",
+    "Winifred Blades",
+    "Yvette Page"
+  ]
+}
