@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wind Up Game Sign-Up</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --border: #e2e2de;
+    --border-strong: #c8c8c2;
+    --text: #1a1a18;
+    --text-secondary: #6b6b65;
+    --text-muted: #9f9f98;
+    --accent: #2d6a4f;
+    --accent-light: #e8f5ef;
+    --accent-hover: #245a42;
+    --danger: #c0392b;
+    --danger-light: #fdf0ee;
+    --warning: #b7791f;
+    --warning-light: #fffbeb;
+    --radius: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.2px; }
+  header .subtitle { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .sync-status { font-size: 12px; opacity: 0.8; }
+  .sync-status.ok { color: #a8e6c8; }
+  .sync-status.err { color: #f5a0a0; }
+
+  /* ── Layout ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+
+  /* ── Admin panel ── */
+  #admin-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    display: none;
+  }
+  .admin-header {
+    background: var(--warning-light);
+    border-bottom: 1px solid #f0d89a;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .admin-header span { font-size: 13px; font-weight: 600; color: var(--warning); }
+  .admin-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .admin-section h3 { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+  /* ── Pool ── */
+  .pool-tags { display: flex; flex-wrap: wrap; gap: 5px; min-height: 32px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); max-height: 120px; overflow-y: auto; }
+  .pool-tag { font-size: 12px; background: var(--accent-light); color: var(--accent); border: 1px solid #b0d8c4; border-radius: 99px; padding: 2px 10px; }
+  .pool-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  /* ── Upload zone ── */
+  .upload-zone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .upload-zone:hover { background: var(--accent-light); border-color: var(--accent); }
+  .upload-zone input { display: none; }
+  .upload-zone p { font-size: 13px; color: var(--text-secondary); }
+  .upload-zone .hint { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── Manual add ── */
+  .manual-row { display: flex; gap: 6px; margin-top: 8px; }
+  .manual-row input { flex: 1; font-size: 13px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; }
+  .manual-row input:focus { border-color: var(--accent); }
+
+  /* ── GitHub config ── */
+  .gh-info { font-size: 12px; color: var(--text-secondary); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; line-height: 1.7; }
+
+  /* ── Admin actions ── */
+  .admin-actions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; background: var(--bg); }
+
+  /* ── Buttons ── */
+  button {
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  button:hover { background: var(--bg); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { background: var(--accent-hover); }
+  button.danger-btn { color: var(--danger); border-color: #e8b4b0; }
+  button.danger-btn:hover { background: var(--danger-light); }
+  button.small { font-size: 12px; padding: 4px 10px; }
+
+  /* ── Top bar ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 10px; }
+  .pool-count { font-size: 13px; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 12px; }
+  .admin-toggle label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none; }
+
+  /* ── Groups grid ── */
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── Group card ── */
+  .group-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .group-card.full { border-color: #b0d8c4; }
+  .group-card.nine-only { border-left: 3px solid #2d6a4f; }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 8px; }
+
+  /* ── Toggle switch ── */
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .toggle-wrap input[type=checkbox] { display: none; }
+  .toggle-track {
+    width: 34px; height: 18px;
+    background: var(--border-strong);
+    border-radius: 99px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-wrap input:checked + .toggle-track { background: var(--accent); }
+  .toggle-wrap input:checked + .toggle-track::after { left: 18px; }
+  .toggle-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  .toggle-wrap input:checked ~ .toggle-label { color: var(--accent); font-weight: 600; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-count { font-size: 12px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 1px 8px; }
+  .card-count.full-badge { background: var(--accent-light); color: var(--accent); border-color: #b0d8c4; }
+  .card-body { padding: 10px 14px; }
+
+  /* ── Name tags ── */
+  .name-tags { display: flex; flex-direction: column; gap: 4px; min-height: 20px; margin-bottom: 10px; }
+  .name-tag {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: var(--text);
+  }
+  .name-tag .del-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-muted);
+    padding: 0 0 0 8px;
+    line-height: 1;
+    display: none;
+    transition: color 0.1s;
+  }
+  .name-tag .del-btn:hover { color: var(--danger); }
+  .admin-mode .name-tag .del-btn { display: inline; }
+  .no-members { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  /* ── Select row ── */
+  .select-row { display: flex; gap: 6px; align-items: center; }
+  .select-row select {
+    flex: 1;
+    font-size: 13px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  .select-row select:focus { border-color: var(--accent); }
+  .full-msg { font-size: 12px; color: var(--text-muted); font-style: italic; }
+  .no-pool-msg { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  /* ── Footer ── */
+  footer { text-align: center; padding: 24px; font-size: 12px; color: var(--text-muted); }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1a18;
+    color: #fff;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 99px;
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 999;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Wind Up Game Sign-Up</h1>
+    <div class="subtitle">Assign players to groups</div>
+  </div>
+  <div class="header-right">
+    <span class="sync-status" id="sync-status"></span>
+    <button class="small" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;" onclick="syncFromGitHub()">↻ Sync</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Admin panel -->
+  <div id="admin-panel">
+    <div class="admin-header">
+      <span>⚙ Admin panel</span>
+      <button class="small danger-btn" onclick="clearAllSlots()">Clear all groups</button>
+    </div>
+    <div class="admin-body">
+
+      <!-- Left: name list -->
+      <div class="admin-section">
+        <h3>Name list</h3>
+        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" accept=".txt,.csv">
+          <p>Click to upload name list</p>
+          <p class="hint">.txt or .csv — one name per line, or comma-separated</p>
+        </div>
+        <div class="manual-row">
+          <input type="text" id="manual-input" placeholder="Or type names, comma-separated">
+          <button onclick="addManualNames()">Add</button>
+        </div>
+        <div style="margin-top:10px;">
+          <div id="pool-tags" class="pool-tags"><span class="pool-empty">No names loaded yet</span></div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="small danger-btn" onclick="clearPool()">Clear list</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: GitHub config -->
+      <div class="admin-section">
+        <h3>GitHub storage</h3>
+        <div class="gh-info">
+          <strong>Repo:</strong> vs8zk2mhdx-web/EGMTeamSignUp<br>
+          <strong>File:</strong> data/signups.json<br>
+          <strong>Token:</strong> configured ✓
+        </div>
+        <div id="gh-msg" style="font-size:12px;color:var(--accent);margin-top:8px;"></div>
+      </div>
+
+    </div>
+    <div class="admin-actions">
+      <button class="primary" onclick="pushToGitHub()">↑ Save to GitHub</button>
+      <button onclick="downloadCSV()">⬇ Download CSV</button>
+      <button class="danger-btn" onclick="clearPool()">Clear name list</button>
+    </div>
+  </div>
+
+  <!-- Instruction message -->
+  <div style="background:#fff8e1;border:1px solid #f0d89a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.7;color:#5a4a1a;">
+    Please select one or more names to add to a group. You can't remove a name from a group, only add. If you are coordinating for your golf buddies, make sure they know you have signed them up. You don't need to fill an entire group — you can leave it partially filled, and other members not grouped by the final date will be filled in by us. If you need to request a deletion or change, email <a href="mailto:tuesgolfteetimes@gmail.com" style="color:#2d6a4f;font-weight:600;">tuesgolfteetimes@gmail.com</a>.
+  </div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="pool-count" id="pool-count-label">Load a name list in admin mode</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="admin-toggle">
+        <label>
+          <input type="checkbox" id="admin-toggle" onchange="toggleAdmin()">
+          Admin mode
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Groups -->
+  <div class="groups-grid" id="groups-grid"></div>
+
+</div>
+
+<footer>Wind Up Game Sign-Up &nbsp;·&nbsp; Data stored on GitHub</footer>
+<div id="toast"></div>
+
+<script>
+const MAX = 4;
+const NUM_GROUPS = 25;
+
+// ── State ──
+let namePool = [];
+let slots = Array.from({ length: NUM_GROUPS }, (_, i) => ({
+  id: i + 1,
+  label: `Group ${i + 1}`,
+  entries: [],
+  nineOnly: false
+}));
+let isAdmin = false;
+let ghConfig = {
+  token: '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',
+  repo: 'vs8zk2mhdx-web/EGMTeamSignUp',
+  path: 'data/signups.json'
+};
+let ghFileSha = null;
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  loadLocal();
+  renderBoard();
+  renderPool();
+});
+
+// ── Local persistence ──
+function saveLocal() {
+  localStorage.setItem('wug_slots', JSON.stringify(slots));
+  localStorage.setItem('wug_pool', JSON.stringify(namePool));
+}
+
+function loadLocal() {
+  try {
+    const s = localStorage.getItem('wug_slots');
+    if (s) slots = JSON.parse(s);
+    const p = localStorage.getItem('wug_pool');
+    if (p) namePool = JSON.parse(p);
+  } catch(e) {}
+}
+
+// ── Name pool ──
+function parseNames(raw) {
+  return raw.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+}
+
+function unassigned() {
+  const taken = new Set(slots.flatMap(s => s.entries));
+  return namePool.filter(n => !taken.has(n));
+}
+
+function addManualNames() {
+  const inp = document.getElementById('manual-input');
+  parseNames(inp.value).forEach(n => { if (n && !namePool.includes(n)) namePool.push(n); });
+  inp.value = '';
+  saveLocal();
+  renderPool();
+  renderBoard();
+}
+
+function clearPool() {
+  if (!confirm('Clear the name list? This will not remove already-assigned names.')) return;
+  namePool = [];
+  saveLocal();
+  renderPool();
+  renderBoard();
+}
+
+function clearAllSlots() {
+  if (!confirm('Remove all assigned names from all groups?')) return;
+  slots.forEach(s => s.entries = []);
+  saveLocal();
+  renderBoard();
+  renderPool();
+}
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    parseNames(ev.target.result).forEach(n => { if (n && !namePool.includes(n)) namePool.push(n); });
+    saveLocal();
+    renderPool();
+    renderBoard();
+    e.target.value = '';
+    toast(`Name list loaded — ${namePool.length} names`);
+  };
+  reader.readAsText(file);
+});
+
+// ── Render pool ──
+function renderPool() {
+  const avail = unassigned();
+  const container = document.getElementById('pool-tags');
+  if (!namePool.length) {
+    container.innerHTML = '<span class="pool-empty">No names loaded yet</span>';
+  } else {
+    container.innerHTML = avail.length
+      ? avail.map(n => `<span class="pool-tag">${n}</span>`).join('')
+      : '<span class="pool-empty">All names assigned</span>';
+  }
+  const total = namePool.length;
+  const label = document.getElementById('pool-count-label');
+  if (!total) {
+    label.textContent = isAdmin ? 'Upload a name list in the admin panel' : 'Waiting for name list';
+  } else {
+    label.textContent = `${avail.length} of ${total} names available`;
+  }
+}
+
+// ── Assign / remove ──
+function assignName(slotId, name) {
+  if (!name) return;
+  const slot = slots.find(s => s.id === slotId);
+  if (!slot || slot.entries.length >= MAX || slot.entries.includes(name)) return;
+  slot.entries.push(name);
+  saveLocal();
+  renderBoard();
+  renderPool();
+}
+
+function removeName(slotId, name) {
+  const slot = slots.find(s => s.id === slotId);
+  if (!slot) return;
+  slot.entries = slot.entries.filter(n => n !== name);
+  saveLocal();
+  renderBoard();
+  renderPool();
+}
+
+function toggleNineOnly(slotId) {
+  const slot = slots.find(s => s.id === slotId);
+  if (!slot) return;
+  slot.nineOnly = !slot.nineOnly;
+  saveLocal();
+  renderBoard();
+}
+
+// ── Render board ──
+function renderBoard() {
+  const grid = document.getElementById('groups-grid');
+  const avail = unassigned();
+  const hasPool = namePool.length > 0;
+
+  grid.innerHTML = slots.map(slot => {
+    const full = slot.entries.length >= MAX;
+    const nameTags = slot.entries.map(name =>
+      `<div class="name-tag">
+        <span>${name}</span>
+        <button class="del-btn" onclick="removeName(${slot.id}, '${name.replace(/'/g,"\\'")}')">✕</button>
+      </div>`
+    ).join('');
+
+    let addSection = '';
+    if (!full) {
+      if (!hasPool) {
+        addSection = `<div class="no-pool-msg">Waiting for name list</div>`;
+      } else if (avail.length === 0) {
+        addSection = `<div class="no-pool-msg">No unassigned names remaining</div>`;
+      } else {
+        addSection = `
+          <div class="select-row">
+            <select id="sel-${slot.id}" onchange="assignName(${slot.id}, this.value); this.value=''">
+              <option value="">— Select a name —</option>
+              ${avail.map(n => `<option value="${n}">${n}</option>`).join('')}
+            </select>
+          </div>`;
+      }
+    }
+
+    return `
+      <div class="group-card${full ? ' full' : ''}${slot.nineOnly ? ' nine-only' : ''}${isAdmin ? ' admin-mode' : ''}">
+        <div class="card-header">
+          <div class="card-header-left">
+            <span class="card-title">${slot.label}</span>
+            <span class="card-count${full ? ' full-badge' : ''}">${full ? 'Full' : `${slot.entries.length} / ${MAX}`}</span>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" ${slot.nineOnly ? 'checked' : ''} onchange="toggleNineOnly(${slot.id})">
+            <span class="toggle-track"></span>
+            <span class="toggle-label">9 holes only</span>
+          </label>
+        </div>
+        <div class="card-body">
+          <div class="name-tags">
+            ${nameTags || `<div class="no-members">No members yet</div>`}
+          </div>
+          ${full ? `<div class="full-msg">This group is full</div>` : addSection}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Admin toggle ──
+function toggleAdmin() {
+  isAdmin = document.getElementById('admin-toggle').checked;
+  document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
+  renderBoard();
+}
+
+// ── GitHub push ──
+async function pushToGitHub() {
+  const { token, repo, path } = ghConfig;
+
+  setSyncStatus('Saving…', '');
+  const payload = { slots, namePool };
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+
+  const body = { message: 'Update sign-up data', content };
+  if (ghFileSha) body.sha = ghFileSha;
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      ghFileSha = data.content.sha;
+      setSyncStatus('Saved ✓', 'ok');
+      toast('Saved to GitHub');
+    } else {
+      setSyncStatus('Save failed', 'err');
+      toast('GitHub error: ' + (data.message || 'unknown'));
+    }
+  } catch(e) {
+    setSyncStatus('Network error', 'err');
+    toast('Could not reach GitHub');
+  }
+}
+
+// ── GitHub pull ──
+async function syncFromGitHub() {
+  const { token, repo, path } = ghConfig;
+
+  setSyncStatus('Syncing…', '');
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (!res.ok) { setSyncStatus('Not found', 'err'); return; }
+    const data = await res.json();
+    ghFileSha = data.sha;
+    const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))));
+    const parsed = JSON.parse(decoded);
+    if (parsed.slots) slots = parsed.slots;
+    if (parsed.namePool) namePool = parsed.namePool;
+    saveLocal();
+    renderBoard();
+    renderPool();
+    setSyncStatus('Synced ✓', 'ok');
+    toast('Loaded from GitHub');
+  } catch(e) {
+    setSyncStatus('Sync error', 'err');
+    toast('Could not sync from GitHub');
+  }
+}
+
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className = 'sync-status' + (cls ? ' ' + cls : '');
+}
+
+// ── CSV download ──
+function downloadCSV() {
+  const header = ['Group', '9 Holes Only', 'Player 1', 'Player 2', 'Player 3', 'Player 4'];
+  const rows = slots.map(slot => {
+    const padded = [...slot.entries];
+    while (padded.length < MAX) padded.push('');
+    return [slot.label, slot.nineOnly ? 'Yes' : 'No', ...padded];
+  });
+  const csv = [header, ...rows]
+    .map(row => row.map(cell => `"${cell}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wind-up-game-signup.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded');
+}
+
+// ── Toast ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
