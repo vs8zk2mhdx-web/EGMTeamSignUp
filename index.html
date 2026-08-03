@@ -546,7 +546,18 @@ function renderBoard() {
 
 // ── Admin toggle ──
 function toggleAdmin() {
-  isAdmin = document.getElementById('admin-toggle').checked;
+  const cb = document.getElementById('admin-toggle');
+  if (cb.checked) {
+    const pwd = prompt('Enter admin password:');
+    if (pwd !== 'Putinspoodle') {
+      cb.checked = false;
+      toast('Incorrect password');
+      return;
+    }
+    isAdmin = true;
+  } else {
+    isAdmin = false;
+  }
   document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
   renderBoard();
 }
