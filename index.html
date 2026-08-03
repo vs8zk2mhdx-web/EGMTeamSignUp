@@ -74,7 +74,7 @@
     justify-content: space-between;
   }
   .admin-header span { font-size: 13px; font-weight: 600; color: var(--warning); }
-  .admin-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .admin-body { padding: 16px; }
   .admin-section h3 { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 
   /* ── Pool ── */
@@ -100,9 +100,6 @@
   .manual-row { display: flex; gap: 6px; margin-top: 8px; }
   .manual-row input { flex: 1; font-size: 13px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; }
   .manual-row input:focus { border-color: var(--accent); }
-
-  /* ── GitHub config ── */
-  .gh-info { font-size: 12px; color: var(--text-secondary); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; line-height: 1.7; }
 
   /* ── Admin actions ── */
   .admin-actions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; background: var(--bg); }
@@ -275,11 +272,16 @@
   </div>
   <div class="header-right">
     <span class="sync-status" id="sync-status"></span>
-    <button class="small" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;" onclick="syncFromGitHub()">↻ Sync</button>
+    <button class="small" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;" onclick="syncFromSheet()">↻ Sync</button>
   </div>
 </header>
 
 <div class="container">
+
+  <!-- Instruction message -->
+  <div style="background:#fff8e1;border:1px solid #f0d89a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.7;color:#5a4a1a;">
+    Please select one or more names to add to a group. You can't remove a name from a group, only add. If you are coordinating for your golf buddies, make sure they know you have signed them up. You don't need to fill an entire group — you can leave it partially filled, and other members not grouped by the final date will be filled in by us. If you need to request a deletion or change, email <a href="mailto:tuesgolfteetimes@gmail.com" style="color:#2d6a4f;font-weight:600;">tuesgolfteetimes@gmail.com</a>.
+  </div>
 
   <!-- Admin panel -->
   <div id="admin-panel">
@@ -288,8 +290,6 @@
       <button class="small danger-btn" onclick="clearAllSlots()">Clear all groups</button>
     </div>
     <div class="admin-body">
-
-      <!-- Left: name list -->
       <div class="admin-section">
         <h3>Name list</h3>
         <div class="upload-zone" onclick="document.getElementById('file-input').click()">
@@ -304,33 +304,15 @@
         <div style="margin-top:10px;">
           <div id="pool-tags" class="pool-tags"><span class="pool-empty">No names loaded yet</span></div>
           <div style="display:flex;gap:6px;margin-top:8px;">
-            <button class="small danger-btn" onclick="clearPool()">Clear list</button>
+            <button class="small danger-btn" onclick="clearPool()">Clear name list</button>
           </div>
         </div>
       </div>
-
-      <!-- Right: GitHub config -->
-      <div class="admin-section">
-        <h3>GitHub storage</h3>
-        <div class="gh-info">
-          <strong>Repo:</strong> vs8zk2mhdx-web/EGMTeamSignUp<br>
-          <strong>File:</strong> data/signups.json<br>
-          <strong>Token:</strong> configured ✓
-        </div>
-        <div id="gh-msg" style="font-size:12px;color:var(--accent);margin-top:8px;"></div>
-      </div>
-
     </div>
     <div class="admin-actions">
-      <button class="primary" onclick="pushToGitHub()">↑ Save to GitHub</button>
+      <button class="primary" onclick="pushToSheet()">↑ Save to Google Sheet</button>
       <button onclick="downloadCSV()">⬇ Download CSV</button>
-      <button class="danger-btn" onclick="clearPool()">Clear name list</button>
     </div>
-  </div>
-
-  <!-- Instruction message -->
-  <div style="background:#fff8e1;border:1px solid #f0d89a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.7;color:#5a4a1a;">
-    Please select one or more names to add to a group. You can't remove a name from a group, only add. If you are coordinating for your golf buddies, make sure they know you have signed them up. You don't need to fill an entire group — you can leave it partially filled, and other members not grouped by the final date will be filled in by us. If you need to request a deletion or change, email <a href="mailto:tuesgolfteetimes@gmail.com" style="color:#2d6a4f;font-weight:600;">tuesgolfteetimes@gmail.com</a>.
   </div>
 
   <!-- Top bar -->
@@ -353,12 +335,13 @@
 
 </div>
 
-<footer>Wind Up Game Sign-Up &nbsp;·&nbsp; Data stored on GitHub</footer>
+<footer>Wind Up Game Sign-Up &nbsp;·&nbsp; Data stored in Google Sheets</footer>
 <div id="toast"></div>
 
 <script>
 const MAX = 4;
 const NUM_GROUPS = 25;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdbmLGcmuPfPNQEBkW09VcrLTt97TeFf83fz5McnHKMlqM2CZuroqYHd41C9NTwFxK/exec';
 
 // ── State ──
 let namePool = [];
@@ -369,24 +352,22 @@ let slots = Array.from({ length: NUM_GROUPS }, (_, i) => ({
   nineOnly: false
 }));
 let isAdmin = false;
-let ghConfig = {
-  token: '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',
-  repo: 'vs8zk2mhdx-web/EGMTeamSignUp',
-  path: 'data/signups.json'
-};
-let ghFileSha = null;
+let saveTimer = null;
 
 // ── Init ──
 window.addEventListener('DOMContentLoaded', () => {
   loadLocal();
   renderBoard();
   renderPool();
+  syncFromSheet();
 });
 
-// ── Local persistence ──
+// ── Local cache ──
 function saveLocal() {
-  localStorage.setItem('wug_slots', JSON.stringify(slots));
-  localStorage.setItem('wug_pool', JSON.stringify(namePool));
+  try {
+    localStorage.setItem('wug_slots', JSON.stringify(slots));
+    localStorage.setItem('wug_pool', JSON.stringify(namePool));
+  } catch(e) {}
 }
 
 function loadLocal() {
@@ -431,6 +412,7 @@ function clearAllSlots() {
   saveLocal();
   renderBoard();
   renderPool();
+  scheduleSave();
 }
 
 document.getElementById('file-input').addEventListener('change', e => {
@@ -477,6 +459,7 @@ function assignName(slotId, name) {
   saveLocal();
   renderBoard();
   renderPool();
+  scheduleSave();
 }
 
 function removeName(slotId, name) {
@@ -486,6 +469,7 @@ function removeName(slotId, name) {
   saveLocal();
   renderBoard();
   renderPool();
+  scheduleSave();
 }
 
 function toggleNineOnly(slotId) {
@@ -494,6 +478,15 @@ function toggleNineOnly(slotId) {
   slot.nineOnly = !slot.nineOnly;
   saveLocal();
   renderBoard();
+  scheduleSave();
+}
+
+// ── Debounced auto-save ──
+// Waits 800ms after last change before saving, to avoid hammering the API
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setSyncStatus('Saving…', '');
+  saveTimer = setTimeout(() => pushToSheet(), 800);
 }
 
 // ── Render board ──
@@ -558,65 +551,47 @@ function toggleAdmin() {
   renderBoard();
 }
 
-// ── GitHub push ──
-async function pushToGitHub() {
-  const { token, repo, path } = ghConfig;
-
+// ── Google Sheets push ──
+async function pushToSheet() {
   setSyncStatus('Saving…', '');
-  const payload = { slots, namePool };
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-
-  const body = { message: 'Update sign-up data', content };
-  if (ghFileSha) body.sha = ghFileSha;
-
+  const data = JSON.stringify({ slots, namePool });
+  const url = `${SCRIPT_URL}?action=write&data=${encodeURIComponent(data)}`;
   try {
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (res.ok) {
-      ghFileSha = data.content.sha;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.success) {
       setSyncStatus('Saved ✓', 'ok');
-      toast('Saved to GitHub');
+      toast('Saved to Google Sheets');
     } else {
       setSyncStatus('Save failed', 'err');
-      toast('GitHub error: ' + (data.message || 'unknown'));
+      toast('Save error — try again');
     }
   } catch(e) {
-    setSyncStatus('Network error', 'err');
-    toast('Could not reach GitHub');
+    setSyncStatus('Error', 'err');
+    toast('Could not reach Google Sheets');
   }
 }
 
-// ── GitHub pull ──
-async function syncFromGitHub() {
-  const { token, repo, path } = ghConfig;
-
+// ── Google Sheets pull ──
+async function syncFromSheet() {
   setSyncStatus('Syncing…', '');
+  const url = `${SCRIPT_URL}?action=read`;
   try {
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-      headers: { Authorization: `token ${token}` }
-    });
-    if (!res.ok) { setSyncStatus('Not found', 'err'); return; }
-    const data = await res.json();
-    ghFileSha = data.sha;
-    const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))));
-    const parsed = JSON.parse(decoded);
-    if (parsed.slots) slots = parsed.slots;
-    if (parsed.namePool) namePool = parsed.namePool;
-    saveLocal();
-    renderBoard();
-    renderPool();
-    setSyncStatus('Synced ✓', 'ok');
-    toast('Loaded from GitHub');
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.slots) {
+      slots = json.slots;
+      namePool = json.namePool || [];
+      saveLocal();
+      renderBoard();
+      renderPool();
+      setSyncStatus('Synced ✓', 'ok');
+    } else {
+      setSyncStatus('No data yet', '');
+    }
   } catch(e) {
     setSyncStatus('Sync error', 'err');
-    toast('Could not sync from GitHub');
+    toast('Could not load from Google Sheets');
   }
 }
 
