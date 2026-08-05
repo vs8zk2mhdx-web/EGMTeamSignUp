@@ -628,9 +628,12 @@ function scheduleSave() {
 async function pushToSheet() {
   setSyncStatus('Saving…', '');
   const data = JSON.stringify({ rows, namePool, instructionText });
-  const url = `${SCRIPT_URL}?action=write&data=${encodeURIComponent(data)}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'write', data })
+    });
     const json = await res.json();
     if (json.success) {
       setSyncStatus('Saved ✓', 'ok');
