@@ -627,13 +627,12 @@ function scheduleSave() {
 // ── Google Sheets push ──
 async function pushToSheet() {
   setSyncStatus('Saving…', '');
-  const data = JSON.stringify({ rows, namePool, instructionText });
+  // Only send rows that have data to keep the URL short
+  const activeRows = rows.filter(r => r.notPlaying || r.player1 || r.player2 || r.nineOnly);
+  const data = JSON.stringify({ rows: activeRows, namePool, instructionText });
+  const url = `${SCRIPT_URL}?action=write&data=${encodeURIComponent(data)}`;
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'write', data })
-    });
+    const res = await fetch(url);
     const json = await res.json();
     if (json.success) {
       setSyncStatus('Saved ✓', 'ok');
