@@ -328,16 +328,10 @@
       <!-- Name list -->
       <div class="admin-section">
         <h3>Name list</h3>
-        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
-          <input type="file" id="file-input" accept=".txt,.csv">
-          <p>Click to upload name list</p>
-          <p class="hint">.txt or .csv — one name per line, or comma-separated</p>
-        </div>
-        <div class="manual-row">
-          <input type="text" id="manual-input" placeholder="Or type names, comma-separated">
-          <button onclick="addManualNames()">Add</button>
-        </div>
-        <div class="pool-tags" id="pool-tags"><span class="pool-empty">No names loaded yet</span></div>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Names are loaded directly from the 2026 EGM Names Google Sheet.</p>
+        <button class="primary" style="width:100%;padding:10px;" onclick="loadNamesFromSheet()">↓ Load names from Google Sheet</button>
+        <div id="load-names-msg" style="font-size:11px;color:var(--green-mid);margin-top:6px;"></div>
+        <div class="pool-tags" id="pool-tags" style="margin-top:8px;"><span class="pool-empty">No names loaded yet</span></div>
         <div style="margin-top:6px;">
           <button class="small danger-btn" onclick="clearPool()">Clear name list</button>
         </div>
@@ -392,7 +386,7 @@
 
 <script>
 const NUM_ROWS = 75;
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw_mTNWqYFSqoxVTSCvzCB2Dy9Y682v_gjRbAuou7maw8EvuVPIRSa2FqXJU8z8G0/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym8tExUUlevuxR-Re4bIG6Skltq29WiERLLusRUqXQopvAEKvmSfUeUf8itmSaavkwXA/exec';
 const DEFAULT_INSTRUCTIONS = 'Please select one or more names to add to a group. You can\'t remove a name from a group, only add. If you are coordinating for your golf buddies, make sure they know you have signed them up. You don\'t need to fill an entire row — you can leave it partially filled, and other members not grouped by the final date will be filled in by us. If you need to request a deletion or change, email <a href="mailto:tuesgolfteetimes@gmail.com">tuesgolfteetimes@gmail.com</a>.';
 
 // ── State ──
@@ -456,10 +450,6 @@ function saveInstructions() {
 }
 
 // ── Name pool ──
-function parseNames(raw) {
-  return raw.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
-}
-
 function allAssigned() {
   const taken = new Set();
   rows.forEach(r => {
@@ -473,15 +463,6 @@ function allAssigned() {
 function unassigned() {
   const taken = allAssigned();
   return namePool.filter(n => !taken.has(n));
-}
-
-function addManualNames() {
-  const inp = document.getElementById('manual-input');
-  parseNames(inp.value).forEach(n => { if (n && !namePool.includes(n)) namePool.push(n); });
-  inp.value = '';
-  saveLocal();
-  renderPool();
-  renderTable();
 }
 
 function clearPool() {
@@ -501,20 +482,31 @@ function clearAllRows() {
   scheduleSave();
 }
 
-document.getElementById('file-input').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    parseNames(ev.target.result).forEach(n => { if (n && !namePool.includes(n)) namePool.push(n); });
-    saveLocal();
-    renderPool();
-    renderTable();
-    e.target.value = '';
-    toast(`Name list loaded — ${namePool.length} names`);
-  };
-  reader.readAsText(file);
-});
+// ── Load names from Google Sheet ──
+async function loadNamesFromSheet() {
+  const msg = document.getElementById('load-names-msg');
+  msg.textContent = 'Loading…';
+  const url = `${SCRIPT_URL}?action=loadNames`;
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.names && json.names.length) {
+      namePool = json.names;
+      saveLocal();
+      renderPool();
+      renderTable();
+      msg.textContent = `${namePool.length} names loaded ✓`;
+      setTimeout(() => msg.textContent = '', 4000);
+      toast(`${namePool.length} names loaded`);
+    } else if (json.error) {
+      msg.textContent = 'Error: ' + json.error;
+    } else {
+      msg.textContent = 'No names found in sheet';
+    }
+  } catch(e) {
+    msg.textContent = 'Could not reach Google Sheets';
+  }
+}
 
 // ── Render pool ──
 function renderPool() {
@@ -528,7 +520,7 @@ function renderPool() {
 
   const label = document.getElementById('pool-count-label');
   if (!namePool.length) {
-    label.textContent = isAdmin ? 'Upload a name list in the admin panel' : 'Waiting for name list';
+    label.textContent = isAdmin ? 'Load names from the admin panel' : 'Waiting for name list';
   } else {
     label.textContent = `${avail.length} of ${namePool.length} names available`;
   }
