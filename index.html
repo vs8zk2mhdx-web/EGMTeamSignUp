@@ -557,16 +557,16 @@ function toggleNineOnly(rowId) {
 
 // ── Render table ──
 function renderTable() {
-  const avail = unassigned();
   const hasPool = namePool.length > 0;
   const tbody = document.getElementById('signup-tbody');
+  // Calculate assigned names ONCE outside the loop
+  const assigned = allAssigned();
 
   tbody.innerHTML = rows.map(row => {
-    const assigned = allAssigned();
 
     function cellSelect(field, currentVal, isNotPlaying) {
-      // Available options = unassigned + current value of this cell
-      const opts = namePool.filter(n => !assigned.has(n) || n === currentVal);
+      // Available = unassigned names + current value of this specific cell
+      const opts = namePool.filter(n => n === currentVal || !assigned.has(n));
       const cls = currentVal
         ? (isNotPlaying ? 'cell-select not-playing-val' : 'cell-select has-value')
         : 'cell-select';
@@ -652,7 +652,12 @@ async function syncFromSheet() {
     const res = await fetch(url);
     const json = await res.json();
     if (json.rows) {
-      rows = json.rows;
+      // Merge saved rows into full 75-row array
+      const saved = json.rows;
+      rows = Array.from({ length: NUM_ROWS }, (_, i) => {
+        const found = saved.find(r => r.id === i + 1);
+        return found || { id: i + 1, notPlaying: '', player1: '', player2: '', nineOnly: false };
+      });
       namePool = json.namePool || [];
       if (json.instructionText) instructionText = json.instructionText;
       saveLocal();
